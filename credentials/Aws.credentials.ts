@@ -281,23 +281,21 @@ export class Aws implements ICredentialType {
 		requestOptions: IHttpRequestOptions,
 	): Promise<IHttpRequestOptions> {
 		let endpoint: URL;
-		let service = requestOptions.qs?.service as string;
-		let path = requestOptions.url;
+		let path:string ='';
+		// let service = requestOptions.qs?.service as string;
+		let uri = (requestOptions as any).uri;
 		const method = requestOptions.method;
 		let body = requestOptions.body;
 		console.log('credentials');
 		console.log(credentials);
 		console.log('requestOptions');
 		console.log(requestOptions);
-		console.log('path');
-		console.log(path);
-		console.log(requestOptions);
-		console.log(requestOptions.url);
-		let url:string = (requestOptions as any).uri;
+		console.log('uri');
+		console.log(uri);
 		console.log('body')
 		console.log(body);
-		console.log('url'+url);
 		let region = credentials.region;
+		let service = 's3';
 		// if (requestOptions.qs?._region) {
 		// 	region = requestOptions.qs._region as string;
 		// 	delete requestOptions.qs._region;
@@ -324,15 +322,9 @@ export class Aws implements ICredentialType {
 					console.log(err);
 				}
 			}
-			service = endpoint.hostname.split('.')[0];
-			region = endpoint.hostname.split('.')[1];
-			console.log('service');
-			console.log(service);
-			console.log('region');
-			console.log(region);
+			// service = endpoint.hostname.split('.')[0];
+			// region = endpoint.hostname.split('.')[1];
 		} else {
-			service = 's3';
-			region = credentials.region;
 			if (!requestOptions.baseURL && !requestOptions.url) {
 				let endpointString: string;
 				if (service === 'lambda' && credentials.lambdaEndpoint) {
@@ -354,13 +346,11 @@ export class Aws implements ICredentialType {
 				} else if (service) {
 					endpointString = `https://${service}.${region}.amazonaws.com`;
 				}
-				console.log('endpointString');
-				console.log(endpointString!);
 
 				// endpoint = new URL(
 				// 	endpointString!.replace('{region}', region as string) + (path as string),
 				// );
-				path = url.replace(credentials.s3Endpoint as string,'')
+				path = uri.replace(credentials.s3Endpoint as string,'')
 				console.log('path')
 				console.log(path)
 				endpoint = new URL(endpointString!)
@@ -402,14 +392,12 @@ export class Aws implements ICredentialType {
 		// }
 
 		// path = endpoint.pathname+ endpoint.search;
-		// console.log('path');
-		// console.log(path);
 		const signOpts = {
 			...requestOptions,
 			headers: requestOptions.headers ?? {},
 			host: endpoint.host,
 			method,
-			service:'s3',
+			service:service,
 			path:path,
 			body: body,
 			region,
